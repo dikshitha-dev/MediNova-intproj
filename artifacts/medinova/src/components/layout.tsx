@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { Pill, Home, MessageSquare, Settings, Activity } from "lucide-react";
+import { Pill, Home, MessageSquare, Settings, Activity, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "./theme-provider";
 
@@ -38,6 +38,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Settings className="h-5 w-5" />
             Settings
           </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start gap-3 px-3 text-muted-foreground hover:text-foreground"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            data-testid="button-theme-toggle"
+          >
+            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            {theme === "dark" ? "Light Mode" : "Dark Mode"}
+          </Button>
         </div>
       </aside>
       <main className="flex-1 flex flex-col min-h-0 bg-background max-h-screen overflow-y-auto">
