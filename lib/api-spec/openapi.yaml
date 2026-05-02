@@ -3,13 +3,21 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: MediNova API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: reminders
+    description: Medication reminder operations
+  - name: chat
+    description: AI chatbot operations
+  - name: dashboard
+    description: Dashboard summary operations
+  - name: openai
+    description: OpenAI AI chat, image, and audio operations
 paths:
   /healthz:
     get:
@@ -24,6 +32,364 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /reminders:
+    get:
+      operationId: listReminders
+      tags: [reminders]
+      summary: List all reminders
+      responses:
+        "200":
+          description: List of reminders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reminder"
+    post:
+      operationId: createReminder
+      tags: [reminders]
+      summary: Create a new reminder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReminderBody"
+      responses:
+        "201":
+          description: Reminder created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reminder"
+
+  /reminders/{id}:
+    get:
+      operationId: getReminder
+      tags: [reminders]
+      summary: Get a reminder by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Reminder found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reminder"
+        "404":
+          description: Not found
+    put:
+      operationId: updateReminder
+      tags: [reminders]
+      summary: Update a reminder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateReminderBody"
+      responses:
+        "200":
+          description: Reminder updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reminder"
+    delete:
+      operationId: deleteReminder
+      tags: [reminders]
+      summary: Delete a reminder
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /reminders/{id}/log:
+    post:
+      operationId: logReminderDose
+      tags: [reminders]
+      summary: Log a dose taken or missed
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogDoseBody"
+      responses:
+        "201":
+          description: Dose logged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DoseLog"
+
+  /reminders/today:
+    get:
+      operationId: getTodayReminders
+      tags: [reminders]
+      summary: Get today's reminder schedule
+      responses:
+        "200":
+          description: Today's schedule
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TodayReminder"
+
+  /chat/messages:
+    get:
+      operationId: getChatHistory
+      tags: [chat]
+      summary: Get chat message history
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        "200":
+          description: Chat history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatMessage"
+    post:
+      operationId: sendChatMessage
+      tags: [chat]
+      summary: Send a message to the AI assistant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageBody"
+      responses:
+        "200":
+          description: AI response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatResponse"
+
+  /chat/messages/clear:
+    delete:
+      operationId: clearChatHistory
+      tags: [chat]
+      summary: Clear chat history
+      responses:
+        "204":
+          description: Cleared
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/activity:
+    get:
+      operationId: getDashboardActivity
+      tags: [dashboard]
+      summary: Get recent activity feed
+      responses:
+        "200":
+          description: Activity feed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+  /openai/conversations:
+    get:
+      operationId: listOpenaiConversations
+      tags: [openai]
+      summary: List all conversations
+      responses:
+        "200":
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OpenaiConversation"
+    post:
+      operationId: createOpenaiConversation
+      tags: [openai]
+      summary: Create a new conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOpenaiConversationBody"
+      responses:
+        "201":
+          description: Created conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiConversation"
+  /openai/conversations/{id}:
+    get:
+      operationId: getOpenaiConversation
+      tags: [openai]
+      summary: Get conversation with messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Conversation with messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiConversationWithMessages"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiError"
+    delete:
+      operationId: deleteOpenaiConversation
+      tags: [openai]
+      summary: Delete a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiError"
+  /openai/conversations/{id}/messages:
+    get:
+      operationId: listOpenaiMessages
+      tags: [openai]
+      summary: List messages in a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OpenaiMessage"
+    post:
+      operationId: sendOpenaiMessage
+      tags: [openai]
+      summary: Send a text message and receive a streaming text response
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendOpenaiMessageBody"
+      responses:
+        "200":
+          description: SSE stream of assistant text chunks
+          content:
+            text/event-stream: {}
+  /openai/conversations/{id}/voice-messages:
+    post:
+      operationId: sendOpenaiVoiceMessage
+      tags: [openai]
+      summary: Send audio and receive a streaming voice response
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendOpenaiVoiceMessageBody"
+      responses:
+        "200":
+          description: SSE stream of transcript and audio chunks
+          content:
+            text/event-stream: {}
+
+  /dashboard/adherence:
+    get:
+      operationId: getAdherenceStats
+      tags: [dashboard]
+      summary: Get medication adherence stats for the past 7 days
+      responses:
+        "200":
+          description: Adherence stats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdherenceDay"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +400,396 @@ components:
       required:
         - status
 
+    Reminder:
+      type: object
+      properties:
+        id:
+          type: integer
+        medicationName:
+          type: string
+        dosage:
+          type: string
+        frequency:
+          type: string
+          enum: [daily, twice_daily, three_times_daily, weekly, as_needed]
+        times:
+          type: array
+          items:
+            type: string
+          description: Array of HH:MM strings
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+        color:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - medicationName
+        - dosage
+        - frequency
+        - times
+        - startDate
+        - isActive
+        - createdAt
+
+    CreateReminderBody:
+      type: object
+      properties:
+        medicationName:
+          type: string
+        dosage:
+          type: string
+        frequency:
+          type: string
+          enum: [daily, twice_daily, three_times_daily, weekly, as_needed]
+        times:
+          type: array
+          items:
+            type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        color:
+          type: string
+          nullable: true
+      required:
+        - medicationName
+        - dosage
+        - frequency
+        - times
+        - startDate
+
+    UpdateReminderBody:
+      type: object
+      properties:
+        medicationName:
+          type: string
+        dosage:
+          type: string
+        frequency:
+          type: string
+          enum: [daily, twice_daily, three_times_daily, weekly, as_needed]
+        times:
+          type: array
+          items:
+            type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+        color:
+          type: string
+          nullable: true
+
+    LogDoseBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [taken, missed, skipped]
+        takenAt:
+          type: string
+          format: date-time
+          nullable: true
+        scheduledTime:
+          type: string
+      required:
+        - status
+        - scheduledTime
+
+    DoseLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        reminderId:
+          type: integer
+        status:
+          type: string
+          enum: [taken, missed, skipped]
+        scheduledTime:
+          type: string
+        takenAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - reminderId
+        - status
+        - scheduledTime
+        - createdAt
+
+    TodayReminder:
+      type: object
+      properties:
+        id:
+          type: integer
+        medicationName:
+          type: string
+        dosage:
+          type: string
+        scheduledTime:
+          type: string
+        status:
+          type: string
+          enum: [pending, taken, missed, skipped]
+        color:
+          type: string
+          nullable: true
+      required:
+        - id
+        - medicationName
+        - dosage
+        - scheduledTime
+        - status
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        language:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - role
+        - content
+        - createdAt
+
+    SendMessageBody:
+      type: object
+      properties:
+        content:
+          type: string
+        language:
+          type: string
+          nullable: true
+          description: ISO language code (en, hi, te, ta, ml, etc.)
+      required:
+        - content
+
+    ChatResponse:
+      type: object
+      properties:
+        userMessage:
+          $ref: "#/components/schemas/ChatMessage"
+        assistantMessage:
+          $ref: "#/components/schemas/ChatMessage"
+        detectedLanguage:
+          type: string
+          nullable: true
+      required:
+        - userMessage
+        - assistantMessage
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalReminders:
+          type: integer
+        activeReminders:
+          type: integer
+        todayTotal:
+          type: integer
+        todayTaken:
+          type: integer
+        todayMissed:
+          type: integer
+        adherenceRate:
+          type: number
+          description: Percentage 0-100
+        streak:
+          type: integer
+          description: Consecutive days of full adherence
+      required:
+        - totalReminders
+        - activeReminders
+        - todayTotal
+        - todayTaken
+        - todayMissed
+        - adherenceRate
+        - streak
+
+    ActivityItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [dose_taken, dose_missed, reminder_created, reminder_updated, chat_message]
+        description:
+          type: string
+        medicationName:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - description
+        - createdAt
+
+    AdherenceDay:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        taken:
+          type: integer
+        missed:
+          type: integer
+        total:
+          type: integer
+        rate:
+          type: number
+      required:
+        - date
+        - taken
+        - missed
+        - total
+        - rate
+
+    OpenaiConversation:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - createdAt
+    OpenaiMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        role:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - conversationId
+        - role
+        - content
+        - createdAt
+    CreateOpenaiConversationBody:
+      type: object
+      properties:
+        title:
+          type: string
+      required:
+        - title
+    SendOpenaiMessageBody:
+      type: object
+      properties:
+        content:
+          type: string
+      required:
+        - content
+    SendOpenaiVoiceMessageBody:
+      type: object
+      properties:
+        audio:
+          type: string
+          description: Base64-encoded audio data
+      required:
+        - audio
+    OpenaiConversationWithMessages:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/OpenaiMessage"
+      required:
+        - id
+        - title
+        - createdAt
+        - messages
+    GenerateOpenaiImageBody:
+      type: object
+      properties:
+        prompt:
+          type: string
+        size:
+          type: string
+          enum: ["1024x1024", "512x512", "256x256"]
+      required:
+        - prompt
+    GenerateOpenaiImageResponse:
+      type: object
+      properties:
+        b64_json:
+          type: string
+      required:
+        - b64_json
+    OpenaiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
